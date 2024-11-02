@@ -26,9 +26,49 @@ export const registerUser = async (
 export const loginUser = async ( email: string, password: string ) => {
   try {
     const response = await api.post('/login', { email, password });
-    return response.data;
+    const token = response.data.token;
+
+    // store token in local storage
+    localStorage.setItem('token', token);
+
+    // fetch user profile immediately after login
+    const profile = await fetchProfile(token);
+
+    return { token, profile };
+
+
   } catch (error) {
     console.error('Login error:', error);
+    throw error;
+  }
+};
+
+// Fetch Profile Data
+export const fetchProfile = async (token: string) => {
+  try {
+    const response = await api.get('/profile', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    throw error;
+  }
+};
+
+// Update Profile Data
+export const updateProfile = async (token: string, profileData: { name: string; email: string; profilePicture?: string }) => {
+  try {
+    const response = await api.put('/profile', profileData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating profile:', error);
     throw error;
   }
 };

@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { loginUser } from "@/app/utils/axios";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,10 +39,22 @@ const Page = () => {
     mode: "onChange",
   });
 
-  const onSubmit = (data: FormSchema) => {
+  const onSubmit = async (data: FormSchema) => {
     setIsLoading(true);
-    console.log(data);
-  }  
+    setError("");
+
+    try {
+      const response = await loginUser(data.email, data.password);
+      if (response.token) {
+        localStorage.setItem("token", response.token); // Save the token
+        router.push("/home");
+      }
+    } catch (error) {
+      setError("Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
+    }
+  };  
 
   return (
     <div className="flex items-center justify-center min-h-screen">
