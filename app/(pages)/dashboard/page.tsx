@@ -41,14 +41,25 @@ const Page = () => {
   }
 
   return (
-    <div>
-      <h1>Welcome, {profile?.name}</h1>
-      {profile?.role === "agent" && <p>Agent-specific content here</p>}
-      {profile?.role === "tenant" && <p>Tenant-specific content here</p>}
-      {profile?.role === "landlord" && <p>Landlord-specific content here</p>}
-      <Button onClick={handleLogout} className="mt-4">
-        Logout
-      </Button>
+    <div className="flex flex-col h-screen lg:mx-16">
+
+      <nav className="flex justify-between items-center p-4">
+        <div className="text-lg font-semibold">
+          Welcome, {profile?.name}
+        </div>
+        <div className="flex space-x-4">
+          <Button variant="link" className="">Chat</Button>
+          <Button variant="link" className="">Profile</Button>
+          <Button onClick={handleLogout} className="">Logout</Button>
+        </div>
+      </nav>
+
+      <div className="flex-grow p-4">
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        {profile?.role === "agent" && <p>Agent-specific content here</p>}
+        {profile?.role === "tenant" && <p>Tenant-specific content here</p>}
+        {profile?.role === "landlord" && <p>Landlord-specific content here</p>}
+      </div>
     </div>
   )
 }
