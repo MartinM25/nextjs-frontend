@@ -31,10 +31,7 @@ export const loginUser = async ( email: string, password: string ) => {
     // store token in local storage
     localStorage.setItem('token', token);
 
-    // fetch user profile immediately after login
-    const profile = await fetchProfile(token);
-
-    return { token, profile };
+    return { token };
 
 
   } catch (error) {

@@ -44,10 +44,9 @@ const Page = () => {
     setError("");
 
     try {
-      const response = await loginUser(data.email, data.password);
-      if (response.token) {
-        localStorage.setItem("token", response.token); // Save the token
-        router.push("/home");
+      const { token } = await loginUser(data.email, data.password);
+      if (token) {
+        router.replace("/dashboard");
       }
     } catch (error) {
       setError("Login failed. Please check your credentials.");
@@ -103,7 +102,7 @@ const Page = () => {
               {isLoading && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Sign Up
+              Sign In
             </Button>
           </form>
         </Form>
