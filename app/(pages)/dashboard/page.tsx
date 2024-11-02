@@ -36,6 +36,12 @@ const Page = () => {
     router.replace("/login");
   };
 
+  const handleNavigateToProfile = () => {
+    const profileString = JSON.stringify(profile);
+    const encodedProfile = encodeURIComponent(profileString); // Encode the JSON string for safe URL usage
+    router.push(`/profile?profile=${encodedProfile}`);
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -49,7 +55,7 @@ const Page = () => {
         </div>
         <div className="flex space-x-4">
           <Button variant="link" className="">Chat</Button>
-          <Button variant="link" className="">Profile</Button>
+          <Button variant="link" onClick={handleNavigateToProfile}>Profile</Button>
           <Button onClick={handleLogout} className="">Logout</Button>
         </div>
       </nav>

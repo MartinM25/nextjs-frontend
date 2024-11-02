@@ -56,9 +56,10 @@ export const fetchProfile = async (token: string) => {
 };
 
 // Update Profile Data
-export const updateProfile = async (token: string, profileData: { name: string; email: string; profilePicture?: string }) => {
+export const updateProfile = async (name: string, email: string) => {
   try {
-    const response = await api.put('/profile', profileData, {
+    const token = localStorage.getItem("token");
+    const response = await api.put('/profile', { name, email }, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
