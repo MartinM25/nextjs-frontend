@@ -1,10 +1,9 @@
-<<<<<<< HEAD
 "use client"
 
 import React, { useState, useEffect, ReactNode } from 'react';
 import { Button } from "@/components/ui/button";
 
-import { getUserChats, fetchUserById, fetchUsersByRole } from '@/app/utils/axios';
+import { getUserChats, fetchUserById } from '@/app/utils/axios';
 import './dialog.css';
 
 import { Input } from "@/components/ui/input"
@@ -14,7 +13,7 @@ interface DialogProps {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
-  users: User[];
+  // users: User[];
 }
 
 interface Chat {
@@ -33,8 +32,8 @@ const Page = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [chats, setChats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<User[]>([]);
-  const [role, setRole] = useState<string>('');
+  const [users, setUsers] = useState<{ [key: string]: User }>({});
+  // const [role, setRole] = useState<string>('');
 
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
@@ -43,24 +42,26 @@ const Page = () => {
     const fetchChats = async () => {
       try {
         setLoading(true);
-        const chatData: Chat[] = await getUserChats();
+        const chatData: Chat[] = await getUserChats(); // Explicitly type chatData
         setChats(chatData);
 
+        // Ensure the token is not null before passing it to fetchUserById
         const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('Token not found in local storage');
         }
 
-        const currentUser = await fetchUserById(token);
-        setRole(currentUser.role);
-
-        const userPromises = chatData.map(chat =>
-          fetchUserById(chat.other_participant)
+        const userPromises = chatData.map((chat) => 
+          fetchUserById(chat.other_participant) // Pass the token directly
         );
 
         const usersData = await Promise.all(userPromises);
+        const usersMap = chatData.reduce<{ [key: string]: User }>((acc, chat, index) => {
+          acc[chat.other_participant] = usersData[index];
+          return acc;
+        }, {});
 
-        setUsers(usersData);
+        setUsers(usersMap);
       } catch (error) {
         console.error('Failed to fetch chats:', error);
       } finally {
@@ -71,28 +72,28 @@ const Page = () => {
     fetchChats();
   }, []);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      if (isDialogOpen) {
-        try {
-          const currentUserId = localStorage.getItem('userId');
-          if (!currentUserId) {
-            console.error('User ID not found in local storage');
-            return; // Exit if userId is not found
-          }
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     if (isDialogOpen) {
+  //       try {
+  //         const currentUserId = localStorage.getItem('userId');
+  //         if (!currentUserId) {
+  //           console.error('User ID not found in local storage');
+  //           return; // Exit if userId is not found
+  //         }
 
-          const fetchedUsers = await fetchUsersByRole(role, currentUserId);
-          setUsers(fetchedUsers); // Assume this is now an array of User
-        } catch (error) {
-          console.error('Failed to fetch users:', error);
-        }
-      }
-    };
+  //         const fetchedUsers = await fetchUsersByRole(role, currentUserId);
+  //         setUsers(fetchedUsers); // Assume this is now an array of User
+  //       } catch (error) {
+  //         console.error('Failed to fetch users:', error);
+  //       }
+  //     }
+  //   };
 
-    fetchUsers();
-  }, [isDialogOpen, role]);
+  //   fetchUsers();
+  // }, [isDialogOpen, role]);
 
-  const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, users }) => {
+  const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;
 
     return (
@@ -102,17 +103,7 @@ const Page = () => {
             &times;
           </Button>
           <h2>Select User to Chat</h2>
-          <div>
-            {users.length > 0 ? (
-              users.map((user) => (
-                <div key={user.email} className="user-item">
-                  <p>{user.name} - {user.email}</p>
-                </div>
-              ))
-            ) : (
-              <p>No users available</p>
-            )}
-          </div>
+          {children}
         </div>
       </div>
     );
@@ -133,7 +124,7 @@ const Page = () => {
           {chats.length > 0 ? (
             chats.map((chat, index) => (
               <div key={index} className="chat-item mb-2 py-4 border-b">
-                <p>{users.find(u => u.email === chat.other_participant)?.name}</p>
+                <p>{users[chat.other_participant]?.name}</p>
                 <p>{chat.last_message_preview}</p>
               </div>
             ))
@@ -144,19 +135,12 @@ const Page = () => {
       )}
 
       {/* Render the Dialog */}
-      <Dialog users={users} isOpen={isDialogOpen} onClose={closeDialog}>
+      <Dialog isOpen={isDialogOpen} onClose={closeDialog}>
         <h2>Dialog Title</h2>
         <p>This is the content of the dialog.</p>
         <Button onClick={closeDialog}>Close</Button>
       </Dialog>
     </div>
-=======
-import React from 'react'
-
-const Page = () => {
-  return (
-    <div>Page</div>
->>>>>>> parent of ddaf4aa (Retrieve chats)
   )
 }
 
