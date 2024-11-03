@@ -1,47 +1,12 @@
 import axios from 'axios';
-import { ChatData } from './types';
 
-// Node.js API instance
+// Base URL setup
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_NODE_API_URL || 'http://localhost:5000/api/users',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/users',
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Django API instance (through Node.js as a reverse proxy)
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5000/api/users', // Node.js service URL, which proxies to Django for certain routes
-});
-
-// Helper to get token from localStorage
-const getToken = () => localStorage.getItem('token');
-
-// Interceptor for `api` (Node.js API calls)
-api.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Interceptor for `axiosInstance` (Django API calls through Node.js proxy)
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-export { api, axiosInstance };
-
-// register new user
+// User Registration 
 export const registerUser = async (
   name: string, 
   email: string, 
@@ -57,25 +22,32 @@ export const registerUser = async (
   }
 };
 
-// user login
-export const loginUser = async (email: string, password: string) => {
+// User Login
+export const loginUser = async ( email: string, password: string ) => {
   try {
     const response = await api.post('/login', { email, password });
     const token = response.data.token;
-    const expirationTime = Date.now() + 55 * 60 * 1000;
+
+    // store token in local storage
     localStorage.setItem('token', token);
-    localStorage.setItem('token_expiration', expirationTime.toString());
+
     return { token };
+
+
   } catch (error) {
     console.error('Login error:', error);
     throw error;
   }
 };
 
-// fetch user profile
-export const fetchProfile = async () => {
+// Fetch Profile Data
+export const fetchProfile = async (token: string) => {
   try {
-    const response = await api.get('/profile');
+    const response = await api.get('/profile', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching profile:', error);
@@ -83,25 +55,21 @@ export const fetchProfile = async () => {
   }
 };
 
-// fetch user by ID
-export const fetchUserById = async (userId: string) => {
-  try {
-    const response = await api.get(`/profile/${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching user by ID:', error);
-  }
-};
-
-// update user profile
+// Update Profile Data
 export const updateProfile = async (name: string, email: string) => {
   try {
-    const response = await api.put('/profile', { name, email });
+    const token = localStorage.getItem("token");
+    const response = await api.put('/profile', { name, email }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('Error updating profile:', error);
     throw error;
   }
+<<<<<<< HEAD
 };
 
 // create a chat
@@ -128,3 +96,19 @@ export const getUserChats = async () => {
     throw error;
   }
 };
+
+// fetch user based on role
+export const fetchUsersByRole = async (role: string, currentUserId: string) => {
+  const url = '/profiles'
+  
+  try {
+    const response = await api.get(`${url}?role=${role}&exclude=${currentUserId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw new Error('Failed to fetch users');
+  }
+}
+=======
+};
+>>>>>>> parent of ddaf4aa (Retrieve chats)

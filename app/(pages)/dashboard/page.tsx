@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { fetchProfile } from "@/app/utils/axios";
 
 import { Button } from "@/components/ui/button";
-import { Loader2 } from 'lucide-react';
 
 const Page = () => {
   const [profile, setProfile] = useState<{ name: string; role: string; email: string } | null>(null);
@@ -39,16 +38,12 @@ const Page = () => {
 
   const handleNavigateToProfile = () => {
     const profileString = JSON.stringify(profile);
-    const encodedProfile = encodeURIComponent(profileString);
+    const encodedProfile = encodeURIComponent(profileString); // Encode the JSON string for safe URL usage
     router.push(`/profile?profile=${encodedProfile}`);
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="animate-spin h-12 w-12" />
-      </div>
-    )
+    return <div>Loading...</div>;
   }
 
   return (
