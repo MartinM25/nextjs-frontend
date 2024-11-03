@@ -54,7 +54,7 @@ const Page = () => {
           Welcome, {profile?.name}
         </div>
         <div className="flex space-x-4">
-          <Button variant="link" className="">Chat</Button>
+          <Button variant="link"  onClick={() => router.push('/chat')}>Chat</Button>
           <Button variant="link" onClick={handleNavigateToProfile}>Profile</Button>
           <Button onClick={handleLogout} className="">Logout</Button>
         </div>
